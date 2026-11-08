@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Una demo de control de stock en Google Sheets para bodegas, ferreterías y boticas pequeñas de Lima. Primero la ves funcionando.">
+  <meta name="referrer" content="no-referrer">
+  <title>Tu stock bajo control, sin complicarte</title>
+  <style>
+    :root { color-scheme: light; --paper: #f7f9fc; --ink: #152b4b; --muted: #52627a; --line: #dbe2ec; --green: #157347; --blue: #173c67; --white: #ffffff; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.55; }
+    a { color: inherit; text-underline-offset: 4px; }
+    a:focus-visible { outline: 3px solid var(--blue); outline-offset: 5px; }
+    [hidden] { display: none !important; }
+    .page { max-width: 1160px; margin: auto; padding: 0 30px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 23px 0 19px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 650; letter-spacing: -.3px; }
+    .brand-mark { display: grid; grid-template-columns: repeat(2, 6px); gap: 3px; padding: 10px; border: 1px solid var(--blue); border-radius: 9px; }
+    .brand-mark i { width: 6px; height: 6px; background: var(--blue); border-radius: 1px; }
+    .badge { border: 1px solid #cbd8e9; background: #eff4fb; color: var(--blue); border-radius: 30px; padding: 5px 12px; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .hero { display: grid; grid-template-columns: 1.13fr 1fr; align-items: center; gap: 52px; padding: 32px 0 26px; }
+    .hero--video-integrado { grid-template-columns: minmax(0, 1fr); }
+    .hero--video-integrado h1 { max-width: 800px; }
+    .hero--video-integrado .intro { max-width: 740px; }
+    .hero--video-integrado .person p { max-width: 620px; }
+    .eyebrow { margin: 0 0 10px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; color: var(--blue); }
+    h1 { margin: 0; font-weight: 750; font-size: clamp(35px, 3.7vw, 48px); line-height: 1.12; letter-spacing: -1.6px; max-width: 560px; }
+    .intro { color: var(--muted); max-width: 510px; margin: 17px 0 19px; font-size: 15px; }
+    .person { display: flex; align-items: center; gap: 14px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .photo { flex: 0 0 112px; width: 112px; height: 112px; overflow: hidden; border: 1px solid #c3d0e2; background: #e9eef6; border-radius: 16px; }
+    .photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .person h2 { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+    .person p { margin: 0; font-size: 13px; color: var(--muted); max-width: 360px; }
+    .person strong { color: var(--ink); }
+    .demo { max-width: 720px; margin: 22px 0; padding: 12px; background: #eef3f9; border: 1px solid #ccd8e6; border-radius: 16px; }
+    .demo video { display: block; width: 100%; height: auto; max-height: 405px; object-fit: contain; background: #0f172a; border-radius: 8px; }
+    a[aria-disabled="true"] { cursor: default; text-decoration: none; }
+    .demo figcaption { margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .steps { padding: 19px 0 24px; border-top: 1px solid var(--line); }
+    .section-title { margin: 0 0 13px; font-size: 15px; font-weight: 700; }
+    .step-list { display: grid; grid-template-columns: repeat(3, 1fr); list-style: none; padding: 0; margin: 0; gap: 28px; counter-reset: step; }
+    .step-list li { display: grid; grid-template-columns: 25px 1fr; gap: 10px; counter-increment: step; }
+    .step-list li::before { content: counter(step); width: 24px; height: 24px; border: 1px solid #c3d0e2; background: #eef3fa; color: var(--blue); border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+    .step-list h3 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+    .step-list p { margin: 0; font-size: 14px; color: var(--muted); }
+    .contact { display: flex; justify-content: space-between; align-items: center; gap: 28px; padding: 21px 24px; background: var(--white); border: 1px solid var(--line); border-radius: 12px; }
+    .contact h2 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+    .contact p { margin: 0; font-size: 13px; color: var(--muted); }
+    .cta-group { text-align: center; flex-shrink: 0; }
+    .whatsapp { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 47px; padding: 10px 19px; background: var(--green); color: white; border-radius: 8px; font-weight: 650; font-size: 13px; text-decoration: none; }
+    .whatsapp[aria-disabled="true"] { background: #286a50; }
+    .whatsapp:not([aria-disabled="true"]):hover { background: #105b38; }
+    .chat-icon { width: 16px; height: 13px; border: 1.5px solid currentColor; border-radius: 5px; position: relative; }
+    .chat-icon::after { content: ""; position: absolute; width: 4px; height: 4px; border-left: 1.5px solid currentColor; transform: skewY(-35deg); bottom: -4px; left: 3px; }
+    .contact .number { font-size: 10px; margin-top: 5px; overflow-wrap: anywhere; }
+    footer { display: flex; justify-content: space-between; gap: 12px; padding: 15px 0 20px; font-size: 10px; color: var(--muted); }
+    footer p { margin: 0; }
+    @media (min-width: 1450px) { .page { padding-top: 24px; } .hero { padding-top: 44px; padding-bottom: 37px; } }
+    @media (max-width: 760px) {
+      .page { padding: 0 20px; } .top { padding: 18px 0; } .brand { font-size: 13px; } .badge { font-size: 10px; padding: 5px 9px; }
+      .hero { grid-template-columns: 1fr; gap: 24px; padding: 26px 0; } h1 { font-size: clamp(35px, 8vw, 46px); letter-spacing: -1px; }
+      .intro { font-size: 15px; } .eyebrow { font-size: 10px; letter-spacing: 1px; }
+      .demo { padding: 8px; } .person p { font-size: 13px; }
+      .steps { padding: 21px 0 25px; } .step-list { grid-template-columns: 1fr; gap: 18px; } .step-list h3 { font-size: 15px; } .step-list p { font-size: 14px; }
+      .contact { flex-direction: column; align-items: stretch; gap: 17px; padding: 21px 18px; } .contact h2 { font-size: 20px; } .contact p { font-size: 13px; }
+      .whatsapp { width: 100%; font-size: 15px; min-height: 50px; } .contact .number { font-size: 11px; }
+      footer { flex-direction: column; font-size: 11px; gap: 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Control de stock para tu negocio</div>
+      <span class="badge">En fase de prueba · Lima</span>
+    </header>
+    <main>
+      <section class="hero hero--video-integrado" aria-labelledby="titulo">
+        <div>
+          <p class="eyebrow">Bodegas · ferreterías · boticas pequeñas</p>
+          <h1 id="titulo">Tu stock bajo control, sin complicarte</h1>
+          <figure class="demo">
+            <video controls playsinline preload="metadata" aria-label="Video de demostración del control de stock">
+              <source src="demo.mp4" type="video/mp4">
+              Tu navegador no puede reproducir este video. <a href="demo.mp4">Abrir el video de la demo</a>.
+            </video>
+            <figcaption>Animación y voz generadas con IA.</figcaption>
+          </figure>
+          <p class="intro">Estoy probando un sistema simple de control de stock en Google Sheets y busco pocos negocios de Lima para probarlo y escuchar qué necesitan.</p>
+          <section class="person" aria-labelledby="quien-soy">
+            <!-- FOTO: copia JPG optimizada del original proporcionado. -->
+            <div class="photo">
+              <img src="foto.jpg" width="600" height="600" alt="Foto de Shenn Solano" decoding="async">
+            </div>
+            <div>
+              <h2 id="quien-soy">Quién soy</h2>
+              <!-- NOMBRE: completado con los datos proporcionados por el usuario. -->
+              <p>Soy <strong>Shenn Solano</strong>. Estoy preparando esta demo y me gustaría mostrártela antes de que decidas si te sirve.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section class="steps" aria-labelledby="como-funciona">
+        <h2 class="section-title" id="como-funciona">Así funciona, en tres pasos</h2>
+        <ol class="step-list">
+          <li><div><h3>Registras ventas y compras</h3><p>Eliges el producto y la cantidad en un formulario sencillo.</p></div></li>
+          <li><div><h3>Revisas tu stock</h3><p>La hoja calcula lo que queda y avisa qué productos llegaron al mínimo para reponer.</p></div></li>
+          <li><div><h3>Recibes el resumen del lunes</h3><p>Cada lunes llega por correo un resumen del stock y los movimientos de la semana.</p></div></li>
+        </ol>
+      </section>
+      <section class="contact" aria-labelledby="confianza">
+        <div>
+          <h2 id="confianza">No pido pagos ni datos bancarios. Primero la ves funcionando.</h2>
+          <p>Si te interesa conocerla, podemos conversar por WhatsApp.</p>
+        </div>
+        <div class="cta-group">
+          <!-- WHATSAPP: el enlace usa el número internacional; el texto muestra
+               solo el número local. Ambos se configuraron con datos del usuario.
+               El mensaje se abre preparado; la persona decide si enviarlo. -->
+          <a id="whatsapp" class="whatsapp" href="https://wa.me/51910746538?text=Hola%2C%20vi%20tu%20p%C3%A1gina%20de%20control%20de%20stock%20y%20me%20gustar%C3%ADa%20ver%20c%C3%B3mo%20funciona." target="_blank" rel="noopener noreferrer" data-numero="51910746538" data-mensaje="Hola, vi tu página de control de stock y me gustaría ver cómo funciona."><span class="chat-icon" aria-hidden="true"></span>Escríbeme por WhatsApp</a>
+          <p class="number">WhatsApp: <span id="numero-visible">910 746 538</span></p>
+          <p class="number" id="whatsapp-estado">Abre el mensaje; tú decides si enviarlo.</p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>Esta página no tiene formularios ni solicita datos personales o contraseñas.</p>
+      <p>Una demo para conversar primero.</p>
+    </footer>
+  </div>
+  <script>
+    // Solo configura enlaces. Sin analítica, almacenamiento ni envíos.
+    (() => {
+      const whatsapp = document.getElementById('whatsapp');
+      const numero = whatsapp.dataset.numero.trim();
+      if (/^51\d{9}$/.test(numero)) {
+        whatsapp.href = 'https://wa.me/' + numero + '?text=' + encodeURIComponent(whatsapp.dataset.mensaje);
+        whatsapp.target = '_blank';
+        whatsapp.rel = 'noopener noreferrer';
+        whatsapp.removeAttribute('aria-disabled');
+        document.getElementById('numero-visible').textContent = numero.slice(2).replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+        document.getElementById('whatsapp-estado').textContent = 'Abre el mensaje; tú decides si enviarlo.';
+      }
+    })();
+  </script>
+</body>
+</html>
